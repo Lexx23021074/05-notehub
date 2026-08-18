@@ -1,13 +1,7 @@
 import { useState } from "react";
-import {
-  useQuery,
-  useMutation,
-  useQueryClient,
-  keepPreviousData,
-} from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { useDebouncedCallback } from "use-debounce";
-import { fetchNotes, createNote } from "../../services/noteService";
-import type { NewNote } from "../../types/note";
+import { fetchNotes } from "../../services/noteService";
 import NoteList from "../NoteList/NoteList";
 import SearchBox from "../SearchBox/SearchBox";
 import Pagination from "../Pagination/Pagination";
@@ -23,20 +17,10 @@ export default function App() {
   const [inputValue, setInputValue] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
-  const queryClient = useQueryClient();
-
   const { data, isLoading, isError } = useQuery({
     queryKey: ["notes", page, search],
     queryFn: () => fetchNotes(page, search),
-    placeholderData: keepPreviousData, // Запобігає мерехтінню інтерфейсу при зміні сторінки
-  });
-
-  const addNoteMutation = useMutation({
-    mutationFn: (newNote: NewNote) => createNote(newNote),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["notes"] });
-      setIsModalOpen(false);
-    },
+    placeholderData: keepPreviousData,
   });
 
   const debouncedSetSearch = useDebouncedCallback((value: string) => {
@@ -60,7 +44,6 @@ export default function App() {
           onChange={handleSearchChange}
         />
 
-        {/* 1. Умовний рендер пагінації */}
         {totalPages > 1 && (
           <Pagination
             page={page}
@@ -83,17 +66,12 @@ export default function App() {
         {!isLoading && !isError && <NoteList notes={notes} />}
       </main>
 
-      {/* 2. Умовний рендер модального вікна */}
       {isModalOpen && (
         <Modal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
         >
-          <NoteForm
-            onSubmit={(values) => addNoteMutation.mutate(values)}
-            onCancel={() => setIsModalOpen(false)}
-            isSubmitting={addNoteMutation.isPending}
-          />
+          <NoteForm onCancel={() => setIsModalOpen(false)} />
         </Modal>
       )}
     </div>
