@@ -1,21 +1,13 @@
-import { useEffect } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { deleteNote, fetchNotes } from "../../services/noteService";
-import Loader from "../Loader/Loader";
-import ErrorMessage from "../ErrorMessage/ErrorMessage";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { deleteNote } from "../../services/noteService";
+import type { Note } from "../../types/note";
 import css from "./NoteList.module.css";
 
 interface NoteListProps {
-  page: number;
-  search: string;
-  onTotalPagesChange: (total: number) => void;
+  notes: Note[];
 }
 
-export default function NoteList({
-  page,
-  search,
-  onTotalPagesChange,
-}: NoteListProps) {
+export default function NoteList({ notes }: NoteListProps) {
   const queryClient = useQueryClient();
 
   const deleteMutation = useMutation({
@@ -25,24 +17,11 @@ export default function NoteList({
     },
   });
 
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["notes", page, search],
-    queryFn: () => fetchNotes(page, search),
-  });
-
-  useEffect(() => {
-    if (data?.totalPages !== undefined) {
-      onTotalPagesChange(data.totalPages);
-    }
-  }, [data?.totalPages, onTotalPagesChange]);
-
-  if (isLoading) return <Loader />;
-  if (isError) return <ErrorMessage />;
-  if (!data?.notes.length) return null;
+  if (!notes.length) return null;
 
   return (
     <ul className={css.list}>
-      {data.notes.map((note) => (
+      {notes.map((note) => (
         <li
           key={note.id}
           className={css.listItem}

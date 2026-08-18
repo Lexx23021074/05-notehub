@@ -1,23 +1,30 @@
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useDebouncedCallback } from "use-debounce";
-import { createNote } from "../../services/noteService";
+import { fetchNotes, createNote } from "../../services/noteService";
 import type { NewNote } from "../../types/note";
 import NoteList from "../NoteList/NoteList";
 import SearchBox from "../SearchBox/SearchBox";
 import Pagination from "../Pagination/Pagination";
 import Modal from "../Modal/Modal";
 import NoteForm from "../NoteForm/NoteForm";
+import Loader from "../Loader/Loader";
+import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import css from "./App.module.css";
 
 export default function App() {
   const [page, setPage] = useState<number>(1);
   const [search, setSearch] = useState<string>("");
   const [inputValue, setInputValue] = useState<string>("");
-  const [totalPages, setTotalPages] = useState<number>(1);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   const queryClient = useQueryClient();
+
+  // Завантаження нотаток тепер виконується в App
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["notes", page, search],
+    queryFn: () => fetchNotes(page, search),
+  });
 
   const addNoteMutation = useMutation({
     mutationFn: (newNote: NewNote) => createNote(newNote),
@@ -36,6 +43,9 @@ export default function App() {
     setInputValue(value);
     debouncedSetSearch(value);
   };
+
+  const notes = data?.notes ?? [];
+  const totalPages = data?.totalPages ?? 0;
 
   return (
     <div className={css.app}>
@@ -58,11 +68,9 @@ export default function App() {
       </header>
 
       <main>
-        <NoteList
-          page={page}
-          search={search}
-          onTotalPagesChange={(total) => setTotalPages(total)}
-        />
+        {isLoading && <Loader />}
+        {isError && <ErrorMessage />}
+        {!isLoading && !isError && <NoteList notes={notes} />}
       </main>
 
       <Modal
