@@ -1,0 +1,16 @@
+.errorWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  margin: 20px 0;
+  background-color: #fde8e8;
+  border: 1px solid #f8b4b4;
+  border-radius: 8px;
+}
+
+.text {
+  color: #9b1c1c;
+  font-size: 15px;
+  margin: 0;
+}

@@ -9,4 +9,10 @@ export interface Note {
   updatedAt: string;
 }
 
-export type NewNote = Omit<Note, "id" | "createdAt" | "updatedAt">;
+// export type NewNote = Omit<Note, "id" | "createdAt" | "updatedAt">;
+
+export interface NewNote {
+  title: string;
+  content?: string;
+  tag: NoteTag;
+}

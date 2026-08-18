@@ -1,0 +1,12 @@
+.loaderWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 0;
+}
+
+.text {
+  font-size: 16px;
+  color: #666;
+  font-weight: 500;
+}
